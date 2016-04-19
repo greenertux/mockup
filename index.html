@@ -223,19 +223,10 @@ var highchart_object = {
                 enableMouseTracking: true
             }
         },
-        // dataLabels: {
-        //         enabled: true,
-        //         crop: false,
-        //         overflow: 'none',
-        //         rotation: 45
-        //     },
         series: []
     };
 
 
-// phone_highChart = new Highcharts.Chart(highchart_object);
-// phone_highChart =  new Highcharts.Chart(
- // phone_highChart = new Highcharts.Chart(highchart_object);
  phone_highChart = new Highcharts.StockChart(highchart_object);
 
 
@@ -618,10 +609,6 @@ jQuery('#js_mobile_tree').jstree(test_string);
         }
         curr_series.push(new_phone_data)
         highchart_object.series = curr_series;
-        // highchart_object.series = [{name: 'A', data: [1,2,3,2,1]}];
-        //  highchart_object.series = [test];
-        // highchart_object.series = [];
-        // phone_highChart.redraw();
 
         phone_highChart.addSeries({
                        name: d.name,
@@ -1047,7 +1034,6 @@ function set_campaign_settings(modell){
               $( "input[name='"+d+"']" ).prop( "checked", false )
         }
   }
-
   var curr_settings = campaign_settings[modell];
   for(var d in curr_settings) {
     var curr_val = curr_settings[d];
@@ -1067,19 +1053,6 @@ function check_end_of_live_available(modell){
     jQuery("#show_end_of_life_div").show();
   else
     jQuery("#show_end_of_life_div").hide();
-}
-
-
-function redraw_legend(){
-  for(i in phone_highChart.series){
-            phone_highChart.series[i].update({ showInLegend: false }, false);
-  }
-  phone_highChart.redraw();
-
-  for(i in phone_highChart.series){
-            phone_highChart.series[i].update({ showInLegend: true }, false);
-  }
-  phone_highChart.redraw();
 }
 
 </script>
