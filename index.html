@@ -287,7 +287,7 @@ var city2loc = {};
   city2loc["Bydgoszcz"] = {"lat": 53.175730,"lng":17.965198, "ratio":0.2,  "cheap_ratio":0.2};
   city2loc["Łódź"] = {"lat": 51.783265,"lng":19.461852, "ratio":0.2,  "cheap_ratio":0.2};
 
-
+var phone_colors = {};
 
 var cheap_phones = {};
   cheap_phones["HTC Desire 620"] = 1;
@@ -426,13 +426,15 @@ d3.json('phones.json', function (error, data) {
        if(! curr_city2loc.hasOwnProperty(d.modell) ){
         //  if(circle_value > 1000) circle_value = 1000;
         curr_city2loc[d.modell] = {};
-        curr_city2loc[d.modell]["color"] = chosen_color;
+        // curr_city2loc[d.modell]["color"] = chosen_color;
+
         curr_city2loc[d.modell][key] = {"lat": value.lat, "lng": value.lng, "value": circle_value, "color": chosen_color};
        }
       //  var circle_value = value.ratio * d.total_sold;
       //  if(circle_value > 5000) circle_value = 5000;
       //  else{
-        curr_city2loc[d.modell]["color"] = chosen_color;
+        // curr_city2loc[d.modell]["color"] = chosen_color;
+        phone_colors[d.modell] = chosen_color;
         curr_city2loc[d.modell][key] = {"lat": value.lat, "lng": value.lng, "value": circle_value, "color": chosen_color};
       //  }
     }
@@ -625,6 +627,7 @@ jQuery('#js_mobile_tree').jstree(test_string);
         phone_highChart.addSeries({
                        name: d.name,
                        data: new_phone_data.data ,
+                       color: phone_colors[d.modell],
                       //  pointStart: Date.UTC(2014, 0, 1),
                       //  pointInterval: 2629746000, // one month
                        marker: {
@@ -680,15 +683,15 @@ jQuery("#js_mobile_tree").on("click", ".jstree-anchor", function(e) {
                   name: selected_node,
                   data: new_phone_data.data ,
                   zIndex: 1,
-                  color: curr_city2loc[selected_node]["color"],
+                  color: phone_colors[selected_node],
                   // pointStart: Date.UTC(2014, 0, 1),
                   // pointInterval: 2629746000, // one month
                   // pointInterval: 3600 * 1000 * 24 * 30// one hour
-                  // marker: {
-                  // fillColor: curr_city2loc[selected_node]["color"],
-                  // lineWidth: 2,
-                  // lineColor: curr_city2loc[selected_node]["color"]
-                  // }
+                  marker: {
+                  fillColor: curr_city2loc[selected_node]["color"],
+                  lineWidth: 2,
+                  lineColor: curr_city2loc[selected_node]["color"]
+                  }
               }
             );
               visible_phones[selected_node] = 1;
@@ -891,7 +894,7 @@ var button = document.getElementById("show_end_of_life");
        var old_label = "HTC Desire 620 (gen_upgrade)", successor_label = "HTC Desire 620 (successor)", competitor_label = "Hua Ascend G620S (gen_upgrade)";
       //  var old_color = "#8c7373", successor_color = "#996666", competitor_color = "#b34d4d";
 
-       var color_old =curr_city2loc[curr_phone]["color"], color_competitor =curr_city2loc[curr_competitor]["color"];
+       var color_old = phone_colors[curr_phone], color_competitor = phone_colors[curr_competitor];
 
 
        if(!(old_label in visible_campaigns)){
@@ -971,7 +974,7 @@ var button = document.getElementById("show_end_of_life_campaign");
            var historical_data_old = phone_dictionary[curr_phone]['historical'].data
            var historical_data_competitor = phone_dictionary[curr_competitor]['historical'].data
 
-           var color_old =curr_city2loc[curr_phone]["color"], color_competitor =curr_city2loc[curr_competitor]["color"];
+           var color_old = phone_colors[curr_phone], color_competitor = phone_colors[curr_competitor];
             // draw new line for old phone
             var old_data = [
               [Date.UTC(2015, 6),4343],
