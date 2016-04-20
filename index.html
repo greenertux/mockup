@@ -69,7 +69,7 @@
           <strong>Attention!</strong>
           <h5><u>Generation Upgrade</u></h5>
           There is generation upgrade information available for this phone.
-          <button type="button" class="btn btn-primary btn-xs" id="show_end_of_life">Show it!</button><br>
+          <button type="button" class="btn btn-primary btn-xs" id="show_end_of_life">Show</button><br>
           <h5><u>Start campaign</u></h5>
           You can <button type="button" class="btn btn-primary btn-xs" id="show_end_of_life_campaign">try</button> and run a marketing campain for the old phone.
 
@@ -288,6 +288,7 @@ var city2loc = {};
   city2loc["Łódź"] = {"lat": 51.783265,"lng":19.461852, "ratio":0.2,  "cheap_ratio":0.2};
 
 var phone_colors = {};
+
 
 var cheap_phones = {};
   cheap_phones["HTC Desire 620"] = 1;
@@ -737,6 +738,8 @@ jQuery("#js_mobile_tree").on("click", ".jstree-anchor", function(e) {
                 jQuery("#"+id+"_anchor").removeClass('jstree-checked');
                 $("#campaign_phone_current option[value='"+selected_node+"']").remove();
                 set_campaign_settings();
+                jQuery("#show_end_of_life_campaign").text("try");
+                jQuery("#show_end_of_life").text("Show");
                 // redraw_legend();
     }
     // update current phone Stats
@@ -862,10 +865,13 @@ jQuery("#js_mobile_tree")
 
 var button = document.getElementById("show_end_of_life");
      button.onclick = function(){
-       //do stuff
+
+       // check which setting the button currently has
+
+
       //  alert("show end-of-life line now!");
       var curr_phone = "HTC Desire 620", curr_competitor = "Hua Ascend G620S";
-
+      var old_pair_phones = {"HTC Desire 620":1,"Hua Ascend G620S":1};
       var historical_data_old = phone_dictionary[curr_phone]['historical'].data
       var historical_data_competitor = phone_dictionary[curr_competitor]['historical'].data
 
@@ -893,8 +899,8 @@ var button = document.getElementById("show_end_of_life");
        ];
        var old_label = "HTC Desire 620 (gen_upgrade)", successor_label = "HTC Desire 620 (successor)", competitor_label = "Hua Ascend G620S (gen_upgrade)";
       //  var old_color = "#8c7373", successor_color = "#996666", competitor_color = "#b34d4d";
-
-       var color_old = phone_colors[curr_phone], color_competitor = phone_colors[curr_competitor];
+      if(jQuery("#show_end_of_life").text() == "Show"){
+        var color_old = phone_colors[curr_phone], color_competitor = phone_colors[curr_competitor];
 
 
        if(!(old_label in visible_campaigns)){
@@ -958,10 +964,22 @@ var button = document.getElementById("show_end_of_life");
 
                 // now disable the original phones
 
-                disable_series({"HTC Desire 620":1,"Hua Ascend G620S":1});
+                disable_series(old_pair_phones);
 
               }
+              jQuery("#show_end_of_life").text("Hide");
+            }
+            else{
+                var phones_to_delete = {};
+                phones_to_delete[old_label] = 1,phones_to_delete[successor_label] = 1,phones_to_delete[competitor_label] = 1 ;
+                delete_series(phones_to_delete);
+                enable_series(old_pair_phones)
+                delete visible_campaigns[old_label];
+                delete visible_campaigns[successor_label];
+                delete visible_campaigns[competitor_label];
 
+                jQuery("#show_end_of_life").text("Show");
+            }
 
      }
 
@@ -992,6 +1010,9 @@ var button = document.getElementById("show_end_of_life_campaign");
             ];
             var old_label = "HTC Desire 620 (campaign)", competitor_label = "Hua Ascend G620S (campaign)";
             // var old_color = "#58D3F7",  competitor_color = "#088A85";
+
+            var test_button = jQuery("#show_end_of_life_campaign").text();
+            if(jQuery("#show_end_of_life_campaign").text() == "try"){
 
             if(!(old_label in visible_campaigns)){
               // add the last historical value to phones
@@ -1029,8 +1050,23 @@ var button = document.getElementById("show_end_of_life_campaign");
                      });
                      visible_campaigns[competitor_label] = 1;
 
-
                    }
+                   jQuery("#show_end_of_life_campaign").text("hide");
+              }
+              else{
+
+
+                var phones_to_delete = {};
+                phones_to_delete[old_label] = 1, phones_to_delete[competitor_label] = 1 ;
+                delete_series(phones_to_delete);
+                // enable_series(old_pair_phones)
+                delete visible_campaigns[old_label];
+                // delete visible_campaigns[successor_label];
+                delete visible_campaigns[competitor_label];
+
+                jQuery("#show_end_of_life_campaign").text("try");
+
+              }
 
           }
 
@@ -1052,12 +1088,33 @@ $( "#campaign_phone_current" ).change(function() {
 });
 
 
-function disable_series(phones_to_disable){
+function disable_series(phones){
     $(phone_highChart.series).each(function(){
                 //this.hide();
-                if(this.name in phones_to_disable){
+                if(this.name in phones){
                     this.setVisible(false, false);
                   }
+    });
+  phone_highChart.redraw();
+}
+
+function enable_series(phones){
+    $(phone_highChart.series).each(function(){
+                //this.hide();
+                if(this.name in phones){
+                    this.setVisible(true, false);
+                  }
+    });
+  phone_highChart.redraw();
+}
+
+
+function delete_series(phones){
+    $(phone_highChart.series).each(function(){
+                //this.hide();
+                if(this.name in phones){
+                    this.remove();
+                }
     });
   phone_highChart.redraw();
 }
