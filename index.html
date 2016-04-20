@@ -44,6 +44,7 @@
     <div class="col-xs-3">
       <h4>Where was the phone "<i><span id="curr_phone_info_name"></span></i>" sold?</h4>
       <div id="map"></div>
+      <hr>
 
       <div class="form-group">
         <label for="sel1">Phone information for:</label>
@@ -53,6 +54,7 @@
           <option>MS Lumia 535</option> -->
         </select>
       </div>
+      <hr>
       <!--
       <h4>Forecast details</h4> -->
         <!-- Options used to create forecasts:
@@ -65,8 +67,8 @@
 
         <div class="alert alert-warning" style="display:none" id="show_end_of_life_div">
           <strong>Attention!</strong>
-          <h5><u>End-of-life</u></h5>
-          There is end-of-life information available for this phone.
+          <h5><u>Generation Upgrade</u></h5>
+          There is generation upgrade information available for this phone.
           <button type="button" class="btn btn-primary btn-xs" id="show_end_of_life">Show it!</button><br>
           <h5><u>Start campaign</u></h5>
           You can <button type="button" class="btn btn-primary btn-xs" id="show_end_of_life_campaign">try</button> and run a marketing campain for the old phone.
@@ -115,8 +117,12 @@
 
 <!-- Javascripts for highchart -->
 
-<script type="text/javascript" src="https://code.jquery.com/jquery-2.2.3.min.js"></script>
-<script type="text/javascript" src="js/highstock.js"></script>
+<script src="https://code.jquery.com/jquery-2.2.3.min.js"></script>
+
+<!-- <script src="https://code.highcharts.com/highcharts.js"></script> -->
+<script src="http://code.highcharts.com/stock/highstock.js"></script>
+<!-- <script src="https://code.highcharts.com/highcharts-more.js"></script> -->
+<!-- <script src="https://code.highcharts.com/modules/exporting.js"></script> -->
 
 <script>
 // some globally defined variables
@@ -223,10 +229,19 @@ var highchart_object = {
                 enableMouseTracking: true
             }
         },
+        // dataLabels: {
+        //         enabled: true,
+        //         crop: false,
+        //         overflow: 'none',
+        //         rotation: 45
+        //     },
         series: []
     };
 
 
+// phone_highChart = new Highcharts.Chart(highchart_object);
+// phone_highChart =  new Highcharts.Chart(
+ // phone_highChart = new Highcharts.Chart(highchart_object);
  phone_highChart = new Highcharts.StockChart(highchart_object);
 
 
@@ -305,7 +320,7 @@ L.tileLayer('https://api.mapbox.com/v4/mapbox.streets/{z}/{x}/{y}.png?access_tok
 }).addTo(map);
 
 
-var colour = d3.scale.category20();
+var colour = d3.scale.category10();
 var phone_dictionary = new Array(), curr_city2loc = new Array();
 d3.json('phones.json', function (error, data) {
   // var beerData = data.response.beers.items;
@@ -411,11 +426,13 @@ d3.json('phones.json', function (error, data) {
        if(! curr_city2loc.hasOwnProperty(d.modell) ){
         //  if(circle_value > 1000) circle_value = 1000;
         curr_city2loc[d.modell] = {};
+        curr_city2loc[d.modell]["color"] = chosen_color;
         curr_city2loc[d.modell][key] = {"lat": value.lat, "lng": value.lng, "value": circle_value, "color": chosen_color};
        }
       //  var circle_value = value.ratio * d.total_sold;
       //  if(circle_value > 5000) circle_value = 5000;
       //  else{
+        curr_city2loc[d.modell]["color"] = chosen_color;
         curr_city2loc[d.modell][key] = {"lat": value.lat, "lng": value.lng, "value": circle_value, "color": chosen_color};
       //  }
     }
@@ -663,14 +680,15 @@ jQuery("#js_mobile_tree").on("click", ".jstree-anchor", function(e) {
                   name: selected_node,
                   data: new_phone_data.data ,
                   zIndex: 1,
+                  color: curr_city2loc[selected_node]["color"],
                   // pointStart: Date.UTC(2014, 0, 1),
                   // pointInterval: 2629746000, // one month
                   // pointInterval: 3600 * 1000 * 24 * 30// one hour
-                  marker: {
-                  fillColor: curr_city2loc[selected_node]["color"],
-                  lineWidth: 2,
-                  lineColor: curr_city2loc[selected_node]["color"]
-                  }
+                  // marker: {
+                  // fillColor: curr_city2loc[selected_node]["color"],
+                  // lineWidth: 2,
+                  // lineColor: curr_city2loc[selected_node]["color"]
+                  // }
               }
             );
               visible_phones[selected_node] = 1;
@@ -707,6 +725,7 @@ jQuery("#js_mobile_tree").on("click", ".jstree-anchor", function(e) {
                     if(curr_series_name.match(re)){
                       console.log("removing line for "+curr_series_name);
                       phone_highChart.series[i].remove();
+                      delete visible_campaigns[curr_ele_name];
                     }
                 }
                 delete visible_phones[selected_node];
@@ -754,17 +773,14 @@ function updateTotal(e) {
     if ( this.checked ) {
         // val += parseFloat(this.value);
 
-        var predicted_data = phone_dictionary[current_phone_name]['predicted'].data;
-        // add last real data item
-        var historical_data = phone_dictionary[current_phone_name]['historical'].data
+        // if(!(curr_label_name in visible_campaigns)){
+          var predicted_data = phone_dictionary[current_phone_name]['predicted'].data;
+          // add last real data item
+          var historical_data = phone_dictionary[current_phone_name]['historical'].data
+          var changed_array = adjust_array(predicted_data,factor);
+          changed_array.unshift(historical_data[historical_data.length - 1])
 
-        var changed_array = adjust_array(predicted_data,factor);
-        changed_array.unshift(historical_data[historical_data.length - 1])
-
-
-
-
-        phone_highChart.addSeries({
+          phone_highChart.addSeries({
                      name: curr_label_name,
                      data:  changed_array,
                     //  pointStart: Date.UTC(2015, 7, 1),
@@ -776,11 +792,12 @@ function updateTotal(e) {
                     //  lineColor: campaign_colors[val]
                     //  }
                  });
+                 campaign_settings[current_phone_name][val] = 1;
+                 console.log("add campaign for "+this.value);
+          // }
         // visible_campaigns[val] = 1;
         // update campaign configurations
         // campaign_settings[] = 1;
-        campaign_settings[current_phone_name][val] = 1;
-        console.log("add campaign for "+this.value);
     } else {
         console.log("remove campaign for "+this.value);
         for(var i = phone_highChart.series.length - 1; i > -1; i--)
@@ -871,9 +888,13 @@ var button = document.getElementById("show_end_of_life");
          [Date.UTC(2015, 10),2190],
          [Date.UTC(2015, 11),1971]
        ];
-       var old_label = "HTC Desire 620 (gen_updgrade)", successor_label = "HTC Desire 620 (successor)", competitor_label = "Hua Ascend G620S (gen_upgrade)";
-       var old_color = "#8c7373", successor_color = "#996666", competitor_color = "#b34d4d";
+       var old_label = "HTC Desire 620 (gen_upgrade)", successor_label = "HTC Desire 620 (successor)", competitor_label = "Hua Ascend G620S (gen_upgrade)";
+      //  var old_color = "#8c7373", successor_color = "#996666", competitor_color = "#b34d4d";
 
+       var color_old =curr_city2loc[curr_phone]["color"], color_competitor =curr_city2loc[curr_competitor]["color"];
+
+
+       if(!(old_label in visible_campaigns)){
 
        // add the last historical value to phones
        old_data.unshift(historical_data_old[historical_data_old.length - 1])
@@ -884,52 +905,59 @@ var button = document.getElementById("show_end_of_life");
        phone_highChart.addSeries({
                     name: old_label,
                     data:  old_data,
-                    // pointStart: Date.UTC(2015, 5, 1),
-                    // pointInterval: 2629746000, // one month
-                    color: old_color,
+
+                    // color: color_old,
+                    color: color_old,
+
+                    dashStyle: 'longdash',
                     id : 'outdated_phone_id'
                    //  marker: {
                    //  fillColor: campaign_colors[val],
                    //  lineWidth: 1,
                    //  lineColor: campaign_colors[val]
                    //  }
-                }, {
+                },{
                     type : 'flags',
                     data : [{
-                        x : Date.UTC(2015, 6, 1),
+                        x : Date.UTC(2015, 6),
                         title : 'End',
                         text : 'End of life for phone'
                     }],
                     onSeries : 'outdated_phone_id',
                     shape : 'circlepin',
-                    width : 16
+                    // width : 16
                 });
        // draw line for successor phone
        phone_highChart.addSeries({
                     name: successor_label,
                     data:  successor_data,
-                    // pointStart: Date.UTC(2015, 6, 1),
-                    // pointInterval: 2629746000, // one month
-                    color: successor_color,
-                   //  marker: {
-                   //  fillColor: campaign_colors[val],
-                   //  lineWidth: 1,
-                   //  lineColor: campaign_colors[val]
-                   //  }
+                    color: color_old,
+                    dashStyle: 'longdash',
                 });
+
        // draw new line for competitor
        phone_highChart.addSeries({
                     name: competitor_label,
                     data:  competitor_data,
                     // pointStart: Date.UTC(2015, 5, 1),
                     // pointInterval: 2629746000, // one month
-                    color: competitor_color,
+                    color: color_competitor,
+                    dashStyle: 'longdash',
                    //  marker: {
                    //  fillColor: campaign_colors[val],
                    //  lineWidth: 1,
                    //  lineColor: campaign_colors[val]
                    //  }
                 });
+                visible_campaigns[old_label] = 1;
+                visible_campaigns[successor_label] = 1;
+                visible_campaigns[competitor_label] = 1;
+
+                // now disable the original phones
+
+                disable_series({"HTC Desire 620":1,"Hua Ascend G620S":1});
+
+              }
 
 
      }
@@ -943,6 +971,7 @@ var button = document.getElementById("show_end_of_life_campaign");
            var historical_data_old = phone_dictionary[curr_phone]['historical'].data
            var historical_data_competitor = phone_dictionary[curr_competitor]['historical'].data
 
+           var color_old =curr_city2loc[curr_phone]["color"], color_competitor =curr_city2loc[curr_competitor]["color"];
             // draw new line for old phone
             var old_data = [
               [Date.UTC(2015, 6),4343],
@@ -959,39 +988,46 @@ var button = document.getElementById("show_end_of_life_campaign");
               [Date.UTC(2015, 11),2839]
             ];
             var old_label = "HTC Desire 620 (campaign)", competitor_label = "Hua Ascend G620S (campaign)";
-            var old_color = "#58D3F7",  competitor_color = "#088A85";
+            // var old_color = "#58D3F7",  competitor_color = "#088A85";
 
-            // add the last historical value to phones
-            old_data.unshift(historical_data_old[historical_data_old.length - 1])
-            // add the last historical value to phones
-            competitor_data.unshift(historical_data_competitor[historical_data_competitor.length - 1])
+            if(!(old_label in visible_campaigns)){
+              // add the last historical value to phones
+              old_data.unshift(historical_data_old[historical_data_old.length - 1])
+              // add the last historical value to phones
+              competitor_data.unshift(historical_data_competitor[historical_data_competitor.length - 1])
 
             phone_highChart.addSeries({
                          name: old_label,
                          data:  old_data,
                          pointStart: Date.UTC(2015, 5, 1),
                          pointInterval: 2629746000, // one month
-                         color: old_color,
+                         color: color_old,
+                         dashStyle: 'shortdot'
                         //  marker: {
                         //  fillColor: campaign_colors[val],
                         //  lineWidth: 1,
                         //  lineColor: campaign_colors[val]
                         //  }
                      });
+                     visible_campaigns[old_label] = 1;
             // draw new line for competitor
             phone_highChart.addSeries({
                          name: competitor_label,
                          data:  competitor_data,
                          pointStart: Date.UTC(2015, 5, 1),
                          pointInterval: 2629746000, // one month
-                         color: competitor_color,
+                         color: color_competitor,
+                         dashStyle: 'shortdot'
                         //  marker: {
                         //  fillColor: campaign_colors[val],
                         //  lineWidth: 1,
                         //  lineColor: campaign_colors[val]
                         //  }
                      });
+                     visible_campaigns[competitor_label] = 1;
 
+
+                   }
 
           }
 
@@ -1011,6 +1047,18 @@ $( "#campaign_phone_current" ).change(function() {
   dc.redrawAll();
 
 });
+
+
+function disable_series(phones_to_disable){
+    $(phone_highChart.series).each(function(){
+                //this.hide();
+                if(this.name in phones_to_disable){
+                    this.setVisible(false, false);
+                  }
+    });
+  phone_highChart.redraw();
+}
+
 
 
 function set_campaign_settings(modell){
