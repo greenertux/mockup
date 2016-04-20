@@ -898,7 +898,7 @@ var button = document.getElementById("show_end_of_life");
        var old_label = "HTC Desire 620 (gen_upgrade)", successor_label = "HTC Desire 620 (successor)", competitor_label = "Hua Ascend G620S (gen_upgrade)";
       //  var old_color = "#8c7373", successor_color = "#996666", competitor_color = "#b34d4d";
       if(jQuery("#show_end_of_life").text() == "Show"){
-        var color_old = phone_colors[curr_phone], color_competitor = phone_colors[curr_competitor];
+        var color_old = phone_colors[curr_phone], color_successor = "#881b1b",color_competitor = phone_colors[curr_competitor];
 
 
        if(!(old_label in visible_campaigns)){
@@ -938,7 +938,7 @@ var button = document.getElementById("show_end_of_life");
        phone_highChart.addSeries({
                     name: successor_label,
                     data:  successor_data,
-                    color: color_old,
+                    color: color_successor,
                     dashStyle: 'longdash',
                 });
 
