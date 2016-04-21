@@ -851,9 +851,6 @@ jQuery("#js_mobile_tree")
 var button = document.getElementById("show_end_of_life");
      button.onclick = function(){
 
-       // check which setting the button currently has
-
-
       //  alert("show end-of-life line now!");
       var curr_phone = "HTC Desire 620", curr_competitor = "Hua Ascend G620S";
       var old_pair_phones = {"HTC Desire 620":1,"Hua Ascend G620S":1};
@@ -861,10 +858,12 @@ var button = document.getElementById("show_end_of_life");
       var historical_data_competitor = phone_dictionary[curr_competitor]['historical'].data
 
        // draw new line for old phone
+       //HTC Desire 620
        var old_data = [
           [Date.UTC(2015, 6), 2369],
           [Date.UTC(2015, 7), 1185],
           [Date.UTC(2015, 8), 0]]
+       //HTC Desire 620 (gen_upgrade)
        var successor_data = [
          [Date.UTC(2015, 6), 200],
          [Date.UTC(2015, 7), 600],
@@ -873,8 +872,8 @@ var button = document.getElementById("show_end_of_life");
          [Date.UTC(2015, 10), 4838],
          [Date.UTC(2015, 11), 5418]];
 
-
-       var competitor_data = [
+       //Hua Ascend G620S
+       var competitor_data = [ 
          [Date.UTC(2015, 6),3419],
          [Date.UTC(2015, 7),4103],
          [Date.UTC(2015, 8),4144],
@@ -978,13 +977,14 @@ var button = document.getElementById("show_end_of_life_campaign");
            var historical_data_competitor = phone_dictionary[curr_competitor]['historical'].data
 
            var color_old = phone_colors[curr_phone], color_competitor = phone_colors[curr_competitor];
-            // draw new line for old phone
+            // draw new line for old phone - HTC Desire 620 (campaign)
             var old_data = [
               [Date.UTC(2015, 6),4343],
               [Date.UTC(2015, 7),4387],
               [Date.UTC(2015, 8),2193],
               [Date.UTC(2015, 9),100]
             ]
+	    //Hua Ascend G620S (campaign)
             var competitor_data = [
               [Date.UTC(2015, 6),3077],
               [Date.UTC(2015, 7),3283],
